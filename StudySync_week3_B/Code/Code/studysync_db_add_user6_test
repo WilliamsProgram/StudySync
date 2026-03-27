@@ -1,0 +1,124 @@
+USE studysync_db;
+
+-- Seed data for existing user id 6 (Milan Purushotam)
+-- Adjust the user id below if your Milan account uses a different id.
+SET @target_user_id := 6;
+
+-- --------------------------------------------------------
+-- Courses
+-- --------------------------------------------------------
+INSERT INTO courses (user_id, course_code, course_name, credits, lecturer, color)
+VALUES
+(@target_user_id, 'CPTR304', 'Internet Authoring', 3, 'Mr. Campbell', '#4f8ef7'),
+(@target_user_id, 'CPTR303', 'Database Systems', 3, 'Mrs. Grant', '#febc2e'),
+(@target_user_id, 'CPTR252', 'Data Structures and Algorithms', 3, 'Dr. Brown', '#38d9a9'),
+(@target_user_id, 'CPTR356', 'IT Project Management', 3, 'Ms. Thomas', '#f7934f');
+
+-- --------------------------------------------------------
+-- Assignments
+-- These subqueries attach each assignment to the correct course for user 6.
+-- --------------------------------------------------------
+INSERT INTO assignments (user_id, course_id, title, description, due_date, grade_weight, priority, status)
+VALUES
+(
+  @target_user_id,
+  (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR304' LIMIT 1),
+  'Practical Test #2',
+  'Complete the login form, session handling, database save, and submit page.',
+  '2026-03-28 23:59:00',
+  15.00,
+  'high',
+  'pending'
+),
+(
+  @target_user_id,
+  (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR303' LIMIT 1),
+  'ERD and Table Design',
+  'Finish the entity relationship diagram and create the required SQL tables.',
+  '2026-03-30 18:00:00',
+  10.00,
+  'medium',
+  'pending'
+),
+(
+  @target_user_id,
+  (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR252' LIMIT 1),
+  'Linked List Exercises',
+  'Solve the linked list insertion and deletion questions from the worksheet.',
+  '2026-04-01 17:00:00',
+  8.00,
+  'high',
+  'pending'
+),
+(
+  @target_user_id,
+  (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR356' LIMIT 1),
+  'Project Charter Draft',
+  'Prepare the first draft of the project charter and stakeholder list.',
+  '2026-04-03 20:00:00',
+  12.00,
+  'medium',
+  'pending'
+);
+
+-- --------------------------------------------------------
+-- Grades
+-- --------------------------------------------------------
+INSERT INTO grades (user_id, course_id, item_name, score, weight, semester)
+VALUES
+(@target_user_id, (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR304' LIMIT 1), 'Quiz 1', 82.00, 5.00, 'Spring 2026'),
+(@target_user_id, (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR303' LIMIT 1), 'Lab 1', 88.00, 10.00, 'Spring 2026'),
+(@target_user_id, (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR252' LIMIT 1), 'Test 1', 79.00, 15.00, 'Spring 2026'),
+(@target_user_id, (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR356' LIMIT 1), 'Presentation', 91.00, 10.00, 'Spring 2026');
+
+-- --------------------------------------------------------
+-- Schedule events
+-- --------------------------------------------------------
+INSERT INTO schedule_events (user_id, title, course_id, location, event_type, start_time, end_time, recur_days, color)
+VALUES
+(@target_user_id, 'CPTR304 Lecture', (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR304' LIMIT 1), 'Room ICT-2', 'class', '2026-03-30 09:00:00', '2026-03-30 10:30:00', 'Mon', '#4f8ef7'),
+(@target_user_id, 'Database Lab', (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR303' LIMIT 1), 'Lab 3', 'class', '2026-03-31 13:00:00', '2026-03-31 15:00:00', 'Tue', '#febc2e'),
+(@target_user_id, 'Study Session - DSA', (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR252' LIMIT 1), 'Library', 'study', '2026-04-01 16:00:00', '2026-04-01 18:00:00', 'Wed', '#38d9a9'),
+(@target_user_id, 'Project Group Meeting', (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR356' LIMIT 1), 'Online', 'group', '2026-04-02 19:00:00', '2026-04-02 20:00:00', 'Thu', '#f7934f');
+
+-- --------------------------------------------------------
+-- Study group
+-- --------------------------------------------------------
+INSERT INTO study_groups (name, course_code, description, created_by)
+VALUES
+('CPTR304 Practical Review', 'CPTR304', 'Review session for forms, sessions, cookies, and MySQLi.', @target_user_id);
+
+SET @group_id := (SELECT id FROM study_groups WHERE created_by = @target_user_id AND name = 'CPTR304 Practical Review' ORDER BY id DESC LIMIT 1);
+
+INSERT INTO group_members (group_id, user_id)
+VALUES
+(@group_id, @target_user_id);
+
+-- --------------------------------------------------------
+-- Group messages
+-- --------------------------------------------------------
+INSERT INTO group_messages (group_id, user_id, message)
+VALUES
+(@group_id, @target_user_id, 'Hi everyone, let us review the practical test requirements tonight.'),
+(@group_id, @target_user_id, 'Please remember to validate the form fields and test your database connection.'),
+(@group_id, @target_user_id, 'I uploaded a sample outline for the PHP practical in the resources section.');
+
+-- --------------------------------------------------------
+-- Notifications
+-- --------------------------------------------------------
+INSERT INTO notifications (user_id, message, is_read, type)
+VALUES
+(@target_user_id, 'Your Practical Test #2 is due tomorrow at 11:59 PM.', 0, 'deadline'),
+(@target_user_id, 'A new message was posted in CPTR304 Practical Review.', 0, 'group'),
+(@target_user_id, 'New resource added for Internet Authoring.', 0, 'resource'),
+(@target_user_id, 'Welcome back to StudySync.', 1, 'system');
+
+-- --------------------------------------------------------
+-- Resources
+-- --------------------------------------------------------
+INSERT INTO resources (user_id, group_id, course_id, title, type, file_path, url, is_private)
+VALUES
+(@target_user_id, @group_id, (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR304' LIMIT 1), 'PHP Forms Notes', 'pdf', 'uploads/php_forms_notes.pdf', NULL, 0),
+(@target_user_id, @group_id, (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR304' LIMIT 1), 'Session Handling Walkthrough', 'link', NULL, 'https://www.php.net/manual/en/book.session.php', 0),
+(@target_user_id, NULL, (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR303' LIMIT 1), 'Database Design Checklist', 'doc', 'uploads/database_checklist.docx', NULL, 1),
+(@target_user_id, NULL, (SELECT id FROM courses WHERE user_id = @target_user_id AND course_code = 'CPTR356' LIMIT 1), 'Stakeholder Planning Slides', 'slides', 'uploads/stakeholder_planning.pptx', NULL, 1);

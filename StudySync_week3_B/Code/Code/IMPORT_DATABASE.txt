@@ -1,7 +1,0 @@
-Import the provided studysync_db.sql file into phpMyAdmin or MySQL before running the project.
-
-Do not manually create the tables one by one.
-Use the studysync_db.sql file included in this folder as the database source.
-
-Database name expected by config.php:
-studysync_db
